@@ -1,68 +1,67 @@
 #!/bin/sh
 bold=$(tput bold)
 normal=$(tput sgr0)
+PROCESS = ""
+INPUT = ""
+TOKENINPUT = ""
+STRINGINPUT = ""
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-IsNodePackageManagerInstalled() {
-if which npm > /dev/null
+IsEmptyProcess(){
+if which $PROCESS > /dev/null
     then # 0 = true
     return 0 
   else return 1
   fi
 }
-IsNodeInstalled() {
-if which node > /dev/null
-	then return 0 
-	else return 1
-  fi
+InputCheck() { 
+while [[ $BotName = '' ]]
+do
+    echo "The Bot Name cannot be Empty!"
+	echo "Aborting!"
+	return;
+done
+clear
+	sudo mkdir "${DIR}/${BotName}"
+	clear
+	cd "${DIR}/${BotName}"
+TokenInput
 }
-IsEmptyID() { 
-if [[ ! -z $BotID ]] || [[ -z $BotID ]]; then 
-return 1 
-else 
-return 0 
-fi 
+TokenCheck() { 
+while [[ $BotToken = '' ]]
+do
+    echo "The Bot Token cannot be Empty!"
+	echo "Aborting!"
+sudo rm -r "${DIR}/${BotName}"
+	return;
+done
+clear
+ConfigCreator
 }
-IsEmptyCreator() { 
-if [[ ! -z $BotCreator ]] || [[ -z $BotCreator ]]; then 
-return 1 
-else 
-return 0 
-fi 
+StringCheck(){
+while [[ $STRINGINPUT = '' ]]
+do
+    #If the String is Empty, Continue
+	continue;
+done
 }
-IsEmptyDescription() {
-if [[ ! -z $BotDescription ]] || [[ -z $BotDescription ]]; then 
-return 1 
-else 
-return 0 
-fi 
+EmptyID(){
+while [[ $BotID = '' ]]
+do
+    echo "Client ID has not been provided, so no OAuth link has been provided."
+	return;
+done
+echo -e 'https://discordapp.com/oauth2/authorize?&client_id='${BotID}'&scope=bot&permissions=10\a
+
+Hold CTRL and click the link above to Invite your bot to your server!\a' 
 }
-IsEmptyEmail() { 
-if [[ ! -z $Email ]] || [[ -z $Email ]]; then 
-return 1 
-else 
-return 0 
-fi 
-}
-IsEmptyLicense() {
-if [[ ! -z $License ]] || [[ -z $License ]]; then 
-return 1 
-else 
-return 0 
-fi 
-}
-IsEmptyVersion() {
-if [[ ! -z $BotVersion ]] || [[ -z $BotVersion ]]; then 
-return 1
-else 
-return 0 
-fi 
-}
+
 Acknowledgement(){
 echo "The following modules will be installed to the system"
 echo "and to ${DIR}/${BotName}:"
 echo "${bold}"
 echo "Discord.js"
-if [[ IsNodePackageManagerInstalled ]]; then {
+set PROCESS = "npm"
+if [[ IsEmptyProcess ]]; then {
 	echo
 	echo "Node Package Manager is already installed." 
 	echo "Warning! Node Package Manager will be updated!"
@@ -70,7 +69,8 @@ if [[ IsNodePackageManagerInstalled ]]; then {
 else 
 echo "Node Package Manager";
 fi
-if [[ IsNodeInstalled ]]; then {
+set PROCESS = "node"
+if [[ IsEmptyProcess ]]; then {
 	echo
         echo "NodeJs is already installed."
 	echo "Warning! NodeJs will be updated!"
@@ -91,23 +91,24 @@ read Answer
 	}
 fi
 }
-
-ConfigCreator(){
-	echo "Please follow the instructions to create your Discord Bot & Node Environment"
+BotNameInput(){
+echo "Please follow the instructions to create your Discord Bot & Node Environment"
 	echo
 	echo "[Required]"
-	echo "Enter the new Bot Name:"
-	read BotName
-	sudo mkdir "${DIR}/${BotName}"
-	clear
-	cd "${DIR}/${BotName}"
+	read -p "Enter a new Bot Name: " BotName
+	set INPUT = "${BotName}"
+	InputCheck
+}
+TokenInput(){
+	echo "[Required]"
+	read -p "Enter the Bot Token: " BotToken
+	set TOKENINPUT = "${BotToken}"
+	TokenCheck
+}
+ConfigCreator(){
 	echo "[Optional]"
 	echo "Enter the Creator Name:"
 	read BotCreator
-	clear
-	echo "[Required]"
-	echo "Enter Bot Token:"
-	read BotToken
 	clear
 	echo "[Optional] Creates an OAuth2 Link at the end of the installation"
 	echo "Enter Bot Client ID:"
@@ -132,35 +133,13 @@ ConfigCreator(){
 	read License
 	clear	
 	echo "Name: ${BotName}"
-if [[ ! IsEmptyLicense ]]; then 
-{
 	echo "Version: v${BotVersion}"
-}
-else
-	echo "Version: v1.0.0"
-fi
 	echo "Bot Directory: ${DIR}/${BotName}"
-if [[ ! IsEmptyCreator ]]; then 
-	{
 	echo "Creator: ${BotCreator}"
-	}
-fi
-if [[ ! IsEmptyDescription ]]; then 
-	{
 	echo "Description:"
 	echo "${BotDescription}"
-	}
-fi
-if [[ ! IsEmptyEmail ]]; then 
-	{
 	echo "Email: ${Email}"
-	}
-fi
-if [[ ! IsEmptyLicense ]]; then 
-{
 	echo "License: ${License}"
-}
-fi
 echo		
 	Acknowledgement
 }
@@ -180,32 +159,17 @@ curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
 echo "Updating..."
 sudo apt update -y
 echo "Initializing Node Environment"
-	if [[ ! IsEmptyDescription ]]; then
+set STRINGINPUT = "${BotDescription}"
+	if [[ StringCheck ]]; then 
 	{
 	echo "${BotDescription}" | tee "${DIR}/${BotName}/README.md"
 	sudo npm set init.description README.md
 	}
 	fi
-	if [[ ! IsEmptyCreator ]] ; then
-	{
 	sudo npm set init.author.name $BotCreator
-	}
-	fi
-	if [[ ! IsEmptyEmail ]] ; then
-	{
 	sudo npm set init.author.email $Email
-	}
-	fi
-	if [[ ! IsEmptyVersion ]] ; then
-	{
 	sudo npm set init.version $BotVersion
-	}
-	fi
-	if [[ ! IsEmptyLicense ]] ; then
-	{
 	sudo npm set init.license $License
-	}
-	fi
 	sudo npm set init.author.author $BotName
 	sudo npm set init.main "${BotName}.js"
 	
@@ -228,9 +192,7 @@ sudo pm2 status
 echo "Installation Complete!"
 echo ${normal}
 echo
-echo -e 'https://discordapp.com/oauth2/authorize?&client_id='${BotID}'&scope=bot&permissions=10\a
-
-Hold CTRL and click the link above to Invite your bot to your server!\a' 
+EmptyID
 }
 WriteProcessConfig(){
 PM='module.exports = {
@@ -285,4 +247,4 @@ CheckSudo
 	echo "Simple Discord Bot Creator"
 	echo "${normal}"
 	echo
-	ConfigCreator
+	BotNameInput
