@@ -60,6 +60,8 @@ echo "The following modules will be installed to the system"
 echo "and to ${DIR}/${BotName}:"
 echo "${bold}"
 echo "Discord.js"
+echo "PM2"
+echo "Curl"
 set PROCESS = "npm"
 if [[ IsEmptyProcess ]]; then {
 	echo
@@ -140,28 +142,19 @@ ConfigCreator(){
 	echo "${BotDescription}"
 	echo "Email: ${Email}"
 	echo "License: ${License}"
-echo		
+	echo		
 	Acknowledgement
 }
-
-InstallModules()
-{
-echo "Updating"
+InstallModules() {
 sudo apt update -y
-echo "Installing/Updating NodeJS..."
 sudo apt install nodejs -y
-echo "Installing/Updating Node Package Manager"
 sudo apt install npm -y
-echo "Installing/Updating Curl"
 sudo apt install curl -y
-echo "Downloading latest NodeJS Version"
 curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
-echo "Updating..."
 sudo apt update -y
-echo "Initializing Node Environment"
-set STRINGINPUT = "${BotDescription}"
-	if [[ StringCheck ]]; then 
-	{
+	echo "Initializing Node Environment"
+	set STRINGINPUT = "${BotDescription}"
+	if [[ StringCheck ]]; then {
 	echo "${BotDescription}" | tee "${DIR}/${BotName}/README.md"
 	sudo npm set init.description README.md
 	}
@@ -172,36 +165,29 @@ set STRINGINPUT = "${BotDescription}"
 	sudo npm set init.license $License
 	sudo npm set init.author.author $BotName
 	sudo npm set init.main "${BotName}.js"
-	
 	sudo npm init --yes
-echo "Installing NPM"
-sudo npm install
-echo "Installing PM2"
-sudo npm install pm2@latest -g
-echo "Installing Discord.js"
-sudo npm install discord.js -y
-WriteBasicDiscordBot
-sudo nodejs --version
-sudo npm --version
-sudo pm2 init
-WriteProcessConfig
-sudo pm2 start ${BotName}.js
-echo ${bold}
-clear
-sudo pm2 status
-echo "Installation Complete!"
-echo ${normal}
-echo
-EmptyID
+	echo "Installing NPM"
+	sudo npm install
+	echo "Installing PM2"
+	sudo npm install pm2@latest -g
+	echo "Installing Discord.js"
+	sudo npm install discord.js -y
+	WriteBasicDiscordBot
+	sudo pm2 init
+	WriteProcessConfig
+	sudo pm2 start ${BotName}.js
+	echo ${bold}
+	clear
+	sudo pm2 status
+	echo "Installation Complete!${normal}"
+	echo
+	EmptyID
 }
 WriteProcessConfig(){
 PM='module.exports = {
   apps : [{
     script: "'${BotName}'.js",
     watch: "."
-  }, {
-    script: "./service-worker/",
-    watch: ["./service-worker"]
   }],
 
   deploy : {
@@ -235,8 +221,49 @@ WriteBasicDiscordBot(){
 BasicBot='const Discord = require("discord.js");
  const client = new Discord.Client();
  const token = "'${BotToken}'";
+ const prefix = ">";
  client.on("ready", () => { console.log("A simple Discord Bot has started"); });
- client.login(token);'
+ client.on("message", async message => { 
+if(message.author.bot) return; //Makes bot ignore itself to avoid a a spam loop
+if(message.content.indexOf(prefix) !== 0) return; // Ignore if does not contain prefix (>)
+ const args = message.content.slice(prefix.length).trim().split(/ +/g);
+ const command = args.shift().toLowerCase();
+// Discord.js v12 Roles (note cache)
+ var admin = message.member.roles.cache.some(r => r.name === "Administrator");
+//Simple Command
+ if(command === "ping") { message.channel.send("pong"); }
+//Kick Command
+if(command === "kick") { 
+ if(!admin) // If Not Admin Return and return with a message
+      return message.reply("You dont have permissions to do this!");
+    let member = message.mentions.members.first() || message.guild.members.get(args[0]);
+    if(!member)
+      return message.reply("Please mention a valid member of this server");
+    if(!member.kickable) 
+      return message.reply("I cannot kick this user! Do they have a higher role?");
+    let reason = args.slice(1).join(' ');
+    if(!reason) reason = "No reason provided";
+    await member.kick(reason).catch(error => message.reply("I failed to kick the user. Error: "+error));
+     message.reply(member.user.tag + " has been kicked by " + message.author.tag);
+}
+//Ban Command
+if(command === "ban") {
+ if(!admin)
+      return message.reply("You dont have permissions to do this!");
+   let member = message.mentions.members.first();
+    if(!member)
+      return message.reply("Please mention a valid member of the server");
+    if(!member.bannable) 
+      return message.reply("I cannot ban this user! Do they have a higher role?");
+    let reason = args.slice(1).join(' ');
+    if(!reason) reason = "No reason provided";
+    await member.ban(reason).catch(error => message.reply("I failed to ban the user. Error: "+error));
+    message.reply(member.user.tag + " has been banned by " + message.author.tag);
+}
+//End Commands
+});
+
+client.login(token);'
 echo "${BasicBot}" | tee "${DIR}/${BotName}/${BotName}.js"
 }
 ## Start Script
