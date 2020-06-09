@@ -34,7 +34,7 @@ MainOptions() {
 #-e to allow backslash and backslash interpreter
 	echo -e "${bold}Simple Discord Bot Creator ${normal}\n"
 #Start by presenting numerical options
-	echo -e "1: Create Discord.js v12 Bot\n2: Create Node Application\n3: Install Node.js v12.18.0 and NPM v6.14.4\n\nFor information on the option, put ? before"
+	echo -e "1: Create Discord.js v12 Bot\n2: Create Node Application\n3: Install Node.js v12.18.0 and NPM v6.14.4\n\nOption: "
 #Choice is the Input
 	read Choice
 #foreach choice, give a different function
