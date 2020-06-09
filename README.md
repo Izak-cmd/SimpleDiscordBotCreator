@@ -24,7 +24,7 @@ If you have previously installed any of the above modules of a lower version, th
 Simply run the CreateDiscordBot.sh script using ```sudo bash CreateDiscordBot.sh```
 
 You must first install the required modules, to do this, choose option 3.
-
+![Output](https://github.com/Izak-cmd/SimpleDiscordBotCreator/blob/master/embed/output.png?raw=true)
 
 The Script will ask your for your Bot's name, this will be the folder name that is created.
 The Script will also ask you for a Bot Token and Client ID.
