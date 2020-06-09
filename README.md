@@ -4,11 +4,10 @@ A Shell Script designed to bring your Discord Bot online within seconds!
 
 ## Getting Started
 
-Simply place the CreateDiscordBot.sh where you wish to initialize your Bot.
-i.e. /home/username/Desktop
+Simply place the CreateDiscordBot.sh in your /home/user folder
 You do not need to create a folder.
 
-### Prerequisites
+### What is Installed
 
 ```
 Discord.js
@@ -23,6 +22,9 @@ If you have previously installed any of the above modules of a lower version, th
 ### Installing
 
 Simply run the CreateDiscordBot.sh script using ```sudo bash CreateDiscordBot.sh```
+
+You must first install the required modules, to do this, choose option 3.
+
 
 The Script will ask your for your Bot's name, this will be the folder name that is created.
 The Script will also ask you for a Bot Token and Client ID.
