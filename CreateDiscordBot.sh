@@ -234,7 +234,7 @@ do
     echo "Client ID has not been provided, so no OAuth link has been provided."
 	return;
 done
-echo -e 'https://discordapp.com/oauth2/authorize?&client_id='${BotID}'&scope=bot&permissions=10\a
+echo -e 'https://discordapp.com/oauth2/authorize?&client_id='${BotID}'&scope=bot&permissions=8\a
 
 Hold CTRL and click the link above to Invite your bot to your server!\a' 
 }

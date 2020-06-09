@@ -21,18 +21,21 @@ If you have previously installed any of the above modules of a lower version, th
 
 ### Installing
 
-Simply run the CreateDiscordBot.sh script using ```sudo bash CreateDiscordBot.sh```
+To download this repository directly to your server, you can run the ```sudo wget https://raw.githubusercontent.com/Izak-cmd/SimpleDiscordBotCreator.sh``` and execute it using ```sudo bash CreateDiscordBot.sh```.
+
 
 You must first install the required modules, to do this, choose option 3.
 ![Output](https://github.com/Izak-cmd/SimpleDiscordBotCreator/blob/master/embed/output.png?raw=true)
+The Script will continue to install NodeJs and NPM.
 
 The Script will ask your for your Bot's name, this will be the folder name that is created.
-The Script will also ask you for a Bot Token and Client ID.
+The Script will also ask you for a Bot Token and Client ID if you have chosen option 1.
+
 Fields are marked with the [Optional] or [Required] tag.
 
-The Script will continue to install NodeJs, NPM, PM2 and Discord.js.
-Upon Completion, if you have provided a Client ID, the Script will provide an OAuth Invite.
-The Script will also put the Bot online after installation.
+
+Upon Completion, if you have provided a Client ID and chosen option 1, the script will provide an OAuth invite.
+The script will also put the Bot online after installation.
 
 ## Authors
 
