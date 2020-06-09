@@ -25,6 +25,7 @@ To download this repository directly to your server, you can run the ```sudo wge
 
 
 You must first install the required modules, to do this, choose option 3.
+
 ![Output](https://github.com/Izak-cmd/SimpleDiscordBotCreator/blob/master/embed/output.png?raw=true)
 
 The Script will continue to install NodeJs and NPM.
