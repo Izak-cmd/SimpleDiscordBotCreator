@@ -1,157 +1,63 @@
 #!/bin/sh
+#Declare distinguishable features
 bold=$(tput bold)
 normal=$(tput sgr0)
-PROCESS = ""
-INPUT = ""
-TOKENINPUT = ""
-STRINGINPUT = ""
+#Delcare Input Strings Required
+PROCESS=""
+INPUT=""
+TOKENINPUT=""
+STRINGINPUT=""
+#Directory is equal to the directory of the bash script
+#Which should be /home/username/.Create.sh
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-IsEmptyProcess(){
-if which $PROCESS > /dev/null
-    then # 0 = true
-    return 0 
-  else return 1
-  fi
-}
-InputCheck() { 
-while [[ $BotName = '' ]]
-do
-    echo "The Bot Name cannot be Empty!"
-	echo "Aborting!"
-	return;
-done
-clear
-	sudo mkdir "${DIR}/${BotName}"
+#Start Functions
+CheckSudo() {
+#sudo is root, root is EUID 0, if not 0 then not sudo
+	if (( $EUID != 0 )); then {
+#Show the Warning
 	clear
-	cd "${DIR}/${BotName}"
-TokenInput
-}
-TokenCheck() { 
-while [[ $BotToken = '' ]]
-do
-    echo "The Bot Token cannot be Empty!"
-	echo "Aborting!"
-sudo rm -r "${DIR}/${BotName}"
-	return;
-done
-clear
-ConfigCreator
-}
-StringCheck(){
-while [[ $STRINGINPUT = '' ]]
-do
-    #If the String is Empty, Continue
-	continue;
-done
-}
-EmptyID(){
-while [[ $BotID = '' ]]
-do
-    echo "Client ID has not been provided, so no OAuth link has been provided."
-	return;
-done
-echo -e 'https://discordapp.com/oauth2/authorize?&client_id='${BotID}'&scope=bot&permissions=10\a
-
-Hold CTRL and click the link above to Invite your bot to your server!\a' 
-}
-
-Acknowledgement(){
-echo "The following modules will be installed to the system"
-echo "and to ${DIR}/${BotName}:"
-echo "${bold}"
-echo "Discord.js"
-echo "PM2"
-echo "Curl"
-set PROCESS = "npm"
-if [[ IsEmptyProcess ]]; then {
-	echo
-	echo "Node Package Manager is already installed." 
-	echo "Warning! Node Package Manager will be updated!"
-}
-else 
-echo "Node Package Manager";
-fi
-set PROCESS = "node"
-if [[ IsEmptyProcess ]]; then {
-	echo
-        echo "NodeJs is already installed."
-	echo "Warning! NodeJs will be updated!"
+	echo -e "${bold}Simple Discord Bot Creator must be run with sudo!${normal}\n"
+	echo "Press enter to quit.."
+#Get Response and don't show the input as indicated by -s
+	read -s Response
+#If there is or isn't any input, exit
+		if [[ ! -z $Response ]] || [[ -z $Response ]]; then {
+		exit 1
+		}
+		fi
 	}
-	else 
-	echo "NodeJs v12"
 	fi
-echo "${normal}"
-echo "Do you wish to continue? (Y/N)"
-read Answer
-	if [[ $Answer = "Y" || $Answer = "y" || $Answer = "" ]]; then {
-	InstallModules
+}
+MainOptions() {
+#Make Title Bold to make distinguishable
+	clear
+#-e to allow backslash and backslash interpreter
+	echo -e "${bold}Simple Discord Bot Creator ${normal}\n"
+#Start by presenting numerical options
+	echo -e "1: Create Discord.js v12 Bot\n2: Create Node Application\n3: Install Node.js v12.18.0 and NPM v6.14.4\n\nFor information on the option, put ? before"
+#Choice is the Input
+	read Choice
+#foreach choice, give a different function
+	if [[ $Choice == "1" ]]; then {
+	clear
+	echo -e "${bold}Discord.js Bot Creator ${normal}\n"
+	BotNameInput
 	}
-	else {
-	sudo rm -r "${DIR}/${BotName}"
-	echo "Aborted Install!"
-	exit 1
+	elif [[ $Choice == "2" ]]; then {
+	clear
+	echo -e "${bold}Node Application Creator ${normal}\n"
+	NodeNameInput
 	}
-fi
-}
-BotNameInput(){
-echo "Please follow the instructions to create your Discord Bot & Node Environment"
-	echo
-	echo "[Required]"
-	read -p "Enter a new Bot Name: " BotName
-	set INPUT = "${BotName}"
-	InputCheck
-}
-TokenInput(){
-	echo "[Required]"
-	read -p "Enter the Bot Token: " BotToken
-	set TOKENINPUT = "${BotToken}"
-	TokenCheck
-}
-ConfigCreator(){
-	echo "[Optional]"
-	echo "Enter the Creator Name:"
-	read BotCreator
+	elif [[ $Choice == "3" ]]; then {
 	clear
-	echo "[Optional] Creates an OAuth2 Link at the end of the installation"
-	echo "Enter Bot Client ID:"
-	read BotID
+	echo -e "${bold}Node.js v12.18.0 Installation ${normal}\n"
+	Installation
 	clear
-	echo "[Optional]"
-	echo "Enter the Version Number:"
-	echo "Example: 1.0.1"
-	read BotVersion
-	clear
-	echo "[Optional]"
-	echo "Enter the Creator Email:"
-	read Email
-	clear	
-	echo "[Optional]"
-	echo "Enter the Bot Description:"
-	read BotDescription
-	clear
-	echo "[Optional]"
-	echo "Enter the License Type:"
-	echo "Example: MIT or CC0"
-	read License
-	clear	
-	echo "Name: ${BotName}"
-	echo "Version: v${BotVersion}"
-	echo "Bot Directory: ${DIR}/${BotName}"
-	echo "Creator: ${BotCreator}"
-	echo "Description:"
-	echo "${BotDescription}"
-	echo "Email: ${Email}"
-	echo "License: ${License}"
-	echo		
-	Acknowledgement
+	echo -e "${bold}Node.js v12.18.0 Installed and Node Package Manager v6.14.4 Installed ${normal}\n"
+	}
+	fi
 }
-InstallModules() {
-sudo apt update -y
-sudo apt install nodejs -y
-sudo apt install npm -y
-sudo apt install curl -y
-curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
-sudo apt update -y
+NpmProcess() {
 	echo "Initializing Node Environment"
 	set STRINGINPUT = "${BotDescription}"
 	if [[ StringCheck ]]; then {
@@ -168,55 +74,41 @@ sudo apt update -y
 	sudo npm init --yes
 	echo "Installing NPM"
 	sudo npm install
+
+}
+PmProcess() {
 	echo "Installing PM2"
 	sudo npm install pm2@latest -g
-	echo "Installing Discord.js"
-	sudo npm install discord.js -y
-	WriteBasicDiscordBot
+	sudo npm install express
 	sudo pm2 init
 	WriteProcessConfig
 	sudo pm2 start ${BotName}.js
 	echo ${bold}
+	sudo pm2 save
 	clear
 	sudo pm2 status
-	echo "Installation Complete!${normal}"
-	echo
+	echo -e "Installation Complete!\nType 'sudo pm2 logs "${BotName}"' to see the result!"
+}
+DiscordProcess() {
+	echo "Installing Discord.js"
+	sudo npm install discord.js -y
+	WriteBasicDiscordBot
+	PmProcess
 	EmptyID
 }
-WriteProcessConfig(){
-PM='module.exports = {
-  apps : [{
-    script: "'${BotName}'.js",
-    watch: "."
-  }],
-
-  deploy : {
-    production : {
-      user : "SSH_USERNAME",
-      host : "SSH_HOSTMACHINE",
-      ref  : "origin/master",
-      repo : "GIT_REPOSITORY",
-      path : "DESTINATION_PATH",
-      "pre-deploy-local": "",
-      "post-deploy" : "npm install && pm2 reload ecosystem.config.js --env production",
-      "pre-setup": ""
-    }
-  }
-};'
-sudo rm ecosystem.config.js
-echo "${PM}" | tee "${DIR}/${BotName}/ecosystem.config.js"
+DiscordInputCheck() { 
+while [[ $BotName = '' ]]
+do
+    	echo -e "The Bot Name cannot be Empty!\nAborting!"
+	return;
+done
+clear
+	sudo mkdir "${DIR}/${BotName}"
+	clear
+	cd "${DIR}/${BotName}"
+TokenInput
 }
-CheckSudo() {
-	if (( $EUID != 0 )); then {
-	echo "Simple Discord Bot Creator must be run with sudo!"
-	read -s Respose
-		if [[ ! -z $Response ]] || [[ -z $Response ]]; then {
-		exit 1
-		}
-		fi
-	}
-	fi
-}
+# A Basic Javascript Discord Bot
 WriteBasicDiscordBot(){
 BasicBot='const Discord = require("discord.js");
  const client = new Discord.Client();
@@ -241,7 +133,7 @@ if(command === "kick") {
       return message.reply("Please mention a valid member of this server");
     if(!member.kickable) 
       return message.reply("I cannot kick this user! Do they have a higher role?");
-    let reason = args.slice(1).join(' ');
+    let reason = args.slice(1).join(" ");
     if(!reason) reason = "No reason provided";
     await member.kick(reason).catch(error => message.reply("I failed to kick the user. Error: "+error));
      message.reply(member.user.tag + " has been kicked by " + message.author.tag);
@@ -255,7 +147,7 @@ if(command === "ban") {
       return message.reply("Please mention a valid member of the server");
     if(!member.bannable) 
       return message.reply("I cannot ban this user! Do they have a higher role?");
-    let reason = args.slice(1).join(' ');
+    let reason = args.slice(1).join(" ");
     if(!reason) reason = "No reason provided";
     await member.ban(reason).catch(error => message.reply("I failed to ban the user. Error: "+error));
     message.reply(member.user.tag + " has been banned by " + message.author.tag);
@@ -266,12 +158,186 @@ if(command === "ban") {
 client.login(token);'
 echo "${BasicBot}" | tee "${DIR}/${BotName}/${BotName}.js"
 }
-## Start Script
+# A Basic Javascript Express Bot
+WriteBasicNodeBot(){
+BasicBot='const express = require("express")
+const app = express()
+const port = 3000
+app.get("/", (req, res) => res.send("Hello World!"))
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))'
+echo "${BasicBot}" | tee "${DIR}/${BotName}/${BotName}.js"
+}
+NodeInputCheck() { 
+while [[ $BotName = '' ]]
+do
+    	echo -e "The Bot Name cannot be Empty!\nAborting!"
+	return;
+done
 clear
-CheckSudo
-	echo "${bold}"
+	
+	sudo mkdir "${DIR}/${BotName}"
 	clear
-	echo "Simple Discord Bot Creator"
-	echo "${normal}"
-	echo
-	BotNameInput
+	cd "${DIR}/${BotName}"
+NodeConfigCreator
+}
+TokenCheck() { 
+while [[ $BotToken = '' ]]
+do
+   	echo -e "The Bot Name cannot be Empty!\nAborting!"
+sudo rm -r "${DIR}/${BotName}"
+	return;
+done
+clear
+DiscordConfigCreator
+}
+DiscordAcknowledgement(){
+echo "${normal}Do you wish to continue? (Y/N)"
+read Answer
+	if [[ $Answer = "Y" || $Answer = "y" || $Answer = "" ]]; then {
+	
+	DiscordProcess
+	
+	}
+	else {
+	sudo rm -r "${DIR}/${BotName}"
+	echo "Aborted Install!"
+	exit 1
+	}
+fi
+}
+NodeAcknowledgement(){
+echo -e "The following modules will be installed to the system\n${normal}Do you wish to continue? (Y/N)"
+read Answer
+	if [[ $Answer = "Y" || $Answer = "y" || $Answer = "" ]]; then {
+	
+	WriteBasicNodeBot
+	NpmProcess
+	PmProcess
+	}
+	else {
+	sudo rm -r "${DIR}/${BotName}"
+	echo "Aborted Install!"
+	exit 1
+	}
+fi
+}
+StringCheck(){
+while [[ $STRINGINPUT = '' ]]
+do
+    #If the String is Empty, Continue
+	continue;
+done
+}
+EmptyID(){
+while [[ $BotID = '' ]]
+do
+    echo "Client ID has not been provided, so no OAuth link has been provided."
+	return;
+done
+echo -e 'https://discordapp.com/oauth2/authorize?&client_id='${BotID}'&scope=bot&permissions=10\a
+
+Hold CTRL and click the link above to Invite your bot to your server!\a' 
+}
+
+BotNameInput(){
+echo -e "Please follow the instructions to create your Discord Bot & Node Environment\n\n [Required]"
+	read -p "Enter a new Bot Name: " BotName
+	set INPUT = "${BotName}"
+	DiscordInputCheck
+}
+NodeNameInput(){
+echo -e "Please follow the instructions to create your Node Environment\n\n[Required]"
+	read -p "Enter a new Bot Name: " BotName
+	set INPUT = "${BotName}"
+	NodeInputCheck
+}
+TokenInput(){
+	echo "[Required]"
+	read -p "Enter the Bot Token: " BotToken
+	set TOKENINPUT = "${BotToken}"
+	TokenCheck
+}
+
+WriteProcessConfig(){
+PM='module.exports = {
+  apps : [{
+    script: "'${BotName}'.js",
+    watch: "."
+  }],
+
+  deploy : {
+    production : {
+      user : "SSH_USERNAME",
+      host : "SSH_HOSTMACHINE",
+      ref  : "origin/master",
+      repo : "GIT_REPOSITORY",
+      path : "DESTINATION_PATH",
+      "pre-deploy-local": "",
+      "post-deploy" : "npm install && pm2 reload ecosystem.config.js --env production",
+      "pre-setup": ""
+    }
+  }
+};'
+sudo rm ecosystem.config.js
+echo "${PM}" | tee "${DIR}/${BotName}/ecosystem.config.js"
+}
+
+DiscordConfigCreator(){
+	echo -e "[Optional]\nEnter the Creator Name:"
+	read BotCreator
+	clear
+	echo -e "[Optional]\nCreates an OAuth2 Link at the end of the installation\Enter Bot Client ID:"
+	read BotID
+	clear
+	echo -e "[Optional]\nEnter the Version Number:\nExample: 1.0.1"
+	read BotVersion
+	clear
+	echo -e "[Optional]\nEnter the Creator Email:"
+	read Email
+	clear	
+	echo "Enter the Bot Description:"
+	read BotDescription
+	clear
+	echo -e "[Optional]\nEnter the License Type:\nExample: MIT or CC0"
+	read License
+	clear	
+	echo -e "Name: ${BotName}\nVersion: v${BotVersion}\nBot Directory: ${DIR}/${BotName}\nCreator: ${BotCreator}\nDescription:\n${BotDescription}\nEmail: ${Email}\nLicense: ${License}\n"	
+	DiscordAcknowledgement
+}
+NodeConfigCreator(){
+
+	echo -e "[Optional]\nEnter the Creator Name:"
+	read BotCreator
+	clear
+	echo -e "[Optional]\nEnter the Version Number:\nExample: 1.0.1"
+	read BotVersion
+	clear
+	echo -e "[Optional]\nEnter the Creator Email:"
+	read Email
+	clear	
+	echo -e "[Optional]\nEnter the Bot Description:"
+	read BotDescription
+	clear
+	echo -e "[Optional]\nEnter the License Type:\nExample: MIT or CC0"
+	read License
+	clear	
+	echo -e "Name: ${BotName}\nVersion: v${BotVersion}\nBot Directory: ${DIR}/${BotName}\nCreator: ${BotCreator}\nDescription:\n${BotDescription}\nEmail: ${Email}\nLicense: ${License}\n"	
+	NodeAcknowledgement
+}
+function Installation() {
+sudo apt update -y
+sudo apt install nodejs -y
+sudo apt install npm -y
+sudo apt install curl -y
+curl -sL https://deb.nodesource.com/setup_12.x | sudo bash - 
+sudo apt update -y
+sudo apt-get install nodejs -y
+sudo apt update -y
+}
+#End Functions
+#Start Script
+#Check if run with Sudo
+	CheckSudo
+#Present Options and interpret the response
+	MainOptions
+
